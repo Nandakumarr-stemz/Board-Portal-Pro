@@ -4,10 +4,12 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
+    "homepage":"https://github.com/Nandakumarr-stemz/Board-Portal-Pro.git",
     "dev": "vite",
     "build": "vite build && copy dist\\index.html dist\\404.html",
     "preview": "vite preview",
     "start": "NODE_ENV=production node dist/index.js",
+    "predeploy": "npm run build",
     "deploy": "gh-pages -d dist",
     "check": "tsc",
     "db:push": "drizzle-kit push"
