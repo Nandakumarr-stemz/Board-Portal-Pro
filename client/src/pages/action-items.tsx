@@ -1,31 +1,23 @@
-import { useState } from "react";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Form,
   FormControl,
@@ -34,31 +26,39 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import {
-  CheckSquare,
-  Plus,
-  Search,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  AlertCircle,
-  Clock,
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   insertActionItemSchema,
   type ActionItem,
-  type InsertActionItem,
   type BoardMember,
+  type InsertActionItem,
 } from "@shared/schema";
-import { format, parseISO, isPast, formatDistanceToNow } from "date-fns";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { format, formatDistanceToNow, isPast, parseISO } from "date-fns";
+import {
+  AlertCircle,
+  CheckSquare,
+  Clock,
+  Edit,
+  MoreHorizontal,
+  Plus,
+  Search,
+  Trash2,
+} from "lucide-react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const actionItemFormSchema = insertActionItemSchema.extend({
@@ -192,9 +192,13 @@ export default function ActionItems() {
   });
 
   const filteredActionItems = actionItems?.filter((item) => {
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || item.status === statusFilter;
-    const matchesPriority = priorityFilter === "all" || item.priority === priorityFilter;
+    const matchesSearch = item.title
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
+    const matchesStatus =
+      statusFilter === "all" || item.status === statusFilter;
+    const matchesPriority =
+      priorityFilter === "all" || item.priority === priorityFilter;
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
@@ -217,7 +221,9 @@ export default function ActionItems() {
     <div className="space-y-6 p-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-medium" data-testid="text-page-title">Action Items</h1>
+          <h1 className="text-2xl font-medium" data-testid="text-page-title">
+            Action Items
+          </h1>
           <p className="text-muted-foreground">
             Track and manage board action items and tasks
           </p>
@@ -237,7 +243,10 @@ export default function ActionItems() {
               </DialogDescription>
             </DialogHeader>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
                 <FormField
                   control={form.control}
                   name="title"
@@ -298,7 +307,10 @@ export default function ActionItems() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Priority</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger data-testid="select-action-priority">
                               <SelectValue placeholder="Select priority" />
@@ -321,7 +333,10 @@ export default function ActionItems() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Assignee (Optional)</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value || undefined}
+                      >
                         <FormControl>
                           <SelectTrigger data-testid="select-action-assignee">
                             <SelectValue placeholder="Select assignee" />
@@ -353,7 +368,9 @@ export default function ActionItems() {
                     disabled={createMutation.isPending}
                     data-testid="button-submit-action"
                   >
-                    {createMutation.isPending ? "Creating..." : "Create Action Item"}
+                    {createMutation.isPending
+                      ? "Creating..."
+                      : "Create Action Item"}
                   </Button>
                 </DialogFooter>
               </form>
@@ -377,7 +394,10 @@ export default function ActionItems() {
             </div>
             <div className="flex gap-2">
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[140px]" data-testid="select-status-filter">
+                <SelectTrigger
+                  className="w-[140px]"
+                  data-testid="select-status-filter"
+                >
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -388,7 +408,10 @@ export default function ActionItems() {
                 </SelectContent>
               </Select>
               <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                <SelectTrigger className="w-[140px]" data-testid="select-priority-filter">
+                <SelectTrigger
+                  className="w-[140px]"
+                  data-testid="select-priority-filter"
+                >
                   <SelectValue placeholder="Priority" />
                 </SelectTrigger>
                 <SelectContent>
@@ -405,7 +428,10 @@ export default function ActionItems() {
           {isLoading ? (
             <div className="space-y-4">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex items-start gap-4 p-4 border rounded-lg">
+                <div
+                  key={i}
+                  className="flex items-start gap-4 p-4 border rounded-lg"
+                >
                   <Skeleton className="h-5 w-5 rounded" />
                   <div className="space-y-2 flex-1">
                     <Skeleton className="h-4 w-1/2" />
@@ -417,9 +443,10 @@ export default function ActionItems() {
             </div>
           ) : filteredActionItems && filteredActionItems.length > 0 ? (
             <div className="space-y-3">
-              {filteredActionItems.map((item) => {
-                const isOverdue = item.status !== "completed" && isPast(parseISO(item.dueDate));
-                const assigneeName = getAssigneeName(item.assigneeId);
+              {filteredActionItems.map((item: any) => {
+                const isOverdue =
+                  item.status !== "completed" && isPast(parseISO(item.dueDate));
+                const assigneeName = getAssigneeName(item?.assigneeId);
 
                 return (
                   <div
@@ -440,7 +467,9 @@ export default function ActionItems() {
                         <div className="flex-1">
                           <p
                             className={`font-medium ${
-                              item.status === "completed" ? "line-through text-muted-foreground" : ""
+                              item.status === "completed"
+                                ? "line-through text-muted-foreground"
+                                : ""
                             }`}
                           >
                             {item.title}
@@ -453,7 +482,9 @@ export default function ActionItems() {
                           <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
                             <div
                               className={`flex items-center gap-1 ${
-                                isOverdue ? "text-destructive" : "text-muted-foreground"
+                                isOverdue
+                                  ? "text-destructive"
+                                  : "text-muted-foreground"
                               }`}
                             >
                               {isOverdue ? (
@@ -474,7 +505,9 @@ export default function ActionItems() {
                                     {getInitials(assigneeName)}
                                   </AvatarFallback>
                                 </Avatar>
-                                <span className="text-muted-foreground">{assigneeName}</span>
+                                <span className="text-muted-foreground">
+                                  {assigneeName}
+                                </span>
                               </div>
                             )}
                           </div>
@@ -494,7 +527,9 @@ export default function ActionItems() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem data-testid={`button-edit-${item.id}`}>
+                              <DropdownMenuItem
+                                data-testid={`button-edit-${item.id}`}
+                              >
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit
                               </DropdownMenuItem>
@@ -518,18 +553,27 @@ export default function ActionItems() {
           ) : (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <CheckSquare className="h-16 w-16 text-muted-foreground/50 mb-4" />
-              <h3 className="text-lg font-medium mb-1">No action items found</h3>
+              <h3 className="text-lg font-medium mb-1">
+                No action items found
+              </h3>
               <p className="text-muted-foreground mb-4">
-                {searchQuery || statusFilter !== "all" || priorityFilter !== "all"
+                {searchQuery ||
+                statusFilter !== "all" ||
+                priorityFilter !== "all"
                   ? "Try adjusting your search or filters"
                   : "Get started by creating your first action item"}
               </p>
-              {!searchQuery && statusFilter === "all" && priorityFilter === "all" && (
-                <Button onClick={() => setIsCreateDialogOpen(true)} data-testid="button-create-first-action">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Action Item
-                </Button>
-              )}
+              {!searchQuery &&
+                statusFilter === "all" &&
+                priorityFilter === "all" && (
+                  <Button
+                    onClick={() => setIsCreateDialogOpen(true)}
+                    data-testid="button-create-first-action"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Action Item
+                  </Button>
+                )}
             </div>
           )}
         </CardContent>

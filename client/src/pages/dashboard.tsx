@@ -1,21 +1,27 @@
-import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery } from "@tanstack/react-query";
 import {
+  AlertCircle,
+  ArrowRight,
   Calendar,
   Clock,
   FileText,
-  Users,
-  ArrowRight,
   MapPin,
-  AlertCircle,
+  Users,
 } from "lucide-react";
 import { Link } from "wouter";
-import type { Meeting, ActionItem, BoardMember, Document } from "@shared/schema";
+import type {
+  ActionItem,
+  BoardMember,
+  Document,
+  Meeting,
+} from "@shared/schema";
 import { format, formatDistanceToNow, isPast, parseISO } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 function getStatusBadgeVariant(status: string) {
   switch (status) {
@@ -53,11 +59,19 @@ function getInitials(name: string) {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+
+  const handleNav = (url: string) => {
+    navigate(url);
+  };
+
   const { data: meetings, isLoading: meetingsLoading } = useQuery<Meeting[]>({
     queryKey: ["/api/meetings"],
   });
 
-  const { data: actionItems, isLoading: actionItemsLoading } = useQuery<ActionItem[]>({
+  const { data: actionItems, isLoading: actionItemsLoading } = useQuery<
+    ActionItem[]
+  >({
     queryKey: ["/api/action-items"],
   });
 
@@ -65,9 +79,11 @@ export default function Dashboard() {
     queryKey: ["/api/members"],
   });
 
-  const { data: documents, isLoading: documentsLoading } = useQuery<Document[]>({
-    queryKey: ["/api/documents"],
-  });
+  const { data: documents, isLoading: documentsLoading } = useQuery<Document[]>(
+    {
+      queryKey: ["/api/documents"],
+    },
+  );
 
   const upcomingMeetings = meetings
     ?.filter((m) => m.status !== "completed")
@@ -78,7 +94,9 @@ export default function Dashboard() {
 
   const pendingActions = actionItems
     ?.filter((a) => a.status === "pending")
-    .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+    .sort(
+      (a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime(),
+    )
     .slice(0, 5);
 
   const recentDocuments = documents?.slice(0, 4);
@@ -117,23 +135,35 @@ export default function Dashboard() {
   return (
     <div className="space-y-6 p-6">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-medium" data-testid="text-page-title">Dashboard</h1>
+        <h1 className="text-2xl font-medium" data-testid="text-page-title">
+          Dashboard
+        </h1>
         <p className="text-muted-foreground">
-          Welcome to Stemz BoardSync. Here's an overview of your board activities.
+          Welcome to Stemz BoardSync. Here's an overview of your board
+          activities.
         </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <Card key={stat.title} className={`${stat.bgGradient} border-0 text-white shadow-lg`}>
+          <Card
+            key={stat.title}
+            className={`${stat.bgGradient} border-0 text-white shadow-lg`}
+          >
             <CardContent className="p-6">
               <div className="flex items-center justify-between gap-4">
                 <div className="space-y-1">
                   <p className="text-sm text-white/80">{stat.title}</p>
-                  {meetingsLoading || actionItemsLoading || membersLoading || documentsLoading ? (
+                  {meetingsLoading ||
+                  actionItemsLoading ||
+                  membersLoading ||
+                  documentsLoading ? (
                     <Skeleton className="h-8 w-12 bg-white/20" />
                   ) : (
-                    <p className="text-3xl font-semibold" data-testid={`stat-${stat.title.toLowerCase().replace(" ", "-")}`}>
+                    <p
+                      className="text-3xl font-semibold"
+                      data-testid={`stat-${stat.title.toLowerCase().replace(" ", "-")}`}
+                    >
                       {stat.value}
                     </p>
                   )}
@@ -152,14 +182,19 @@ export default function Dashboard() {
           {nextMeeting && (
             <Card>
               <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4">
-                <CardTitle className="text-lg font-medium">Next Meeting</CardTitle>
+                <CardTitle className="text-lg font-medium">
+                  Next Meeting
+                </CardTitle>
                 <Badge variant={getStatusBadgeVariant(nextMeeting.status)}>
                   {nextMeeting.status.replace("_", " ")}
                 </Badge>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <h3 className="text-xl font-medium" data-testid="text-next-meeting-title">
+                  <h3
+                    className="text-xl font-medium"
+                    data-testid="text-next-meeting-title"
+                  >
                     {nextMeeting.title}
                   </h3>
                   {nextMeeting.description && (
@@ -171,7 +206,9 @@ export default function Dashboard() {
                 <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    <span>{format(parseISO(nextMeeting.date), "EEEE, MMMM d, yyyy")}</span>
+                    <span>
+                      {format(parseISO(nextMeeting.date), "EEEE, MMMM d, yyyy")}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4" />
@@ -185,12 +222,15 @@ export default function Dashboard() {
                   )}
                 </div>
                 <div className="flex items-center gap-3 pt-2">
-                  <Link href={`/meetings/${nextMeeting.id}`}>
+                  <Button
+                    // href={`/meetings/${nextMeeting.id}`}
+                    onClick={() => navigate(`/meetings/${nextMeeting.id}`)}
+                  >
                     <Button data-testid="button-view-meeting">
                       View Meeting Details
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
-                  </Link>
+                  </Button>
                 </div>
               </CardContent>
             </Card>
@@ -198,13 +238,19 @@ export default function Dashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4">
-              <CardTitle className="text-lg font-medium">Upcoming Meetings</CardTitle>
-              <Link href="/meetings">
-                <Button variant="ghost" size="sm" data-testid="button-view-all-meetings">
+              <CardTitle className="text-lg font-medium">
+                Upcoming Meetings
+              </CardTitle>
+              <span onClick={() => navigate(`/meetings`)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  data-testid="button-view-all-meetings"
+                >
                   View All
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
-              </Link>
+              </span>
             </CardHeader>
             <CardContent>
               {meetingsLoading ? (
@@ -222,9 +268,10 @@ export default function Dashboard() {
               ) : upcomingMeetings && upcomingMeetings.length > 0 ? (
                 <div className="space-y-4">
                   {upcomingMeetings.map((meeting) => (
-                    <Link
+                    <Button
                       key={meeting.id}
-                      href={`/meetings/${meeting.id}`}
+                      // href={`/meetings/${meeting.id}`}
+                      onClick={() => navigate(`/meetings/${meeting?.id}`)}
                       className="block"
                     >
                       <div
@@ -235,27 +282,38 @@ export default function Dashboard() {
                           <Calendar className="h-5 w-5" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{meeting.title}</p>
+                          <p className="font-medium truncate">
+                            {meeting.title}
+                          </p>
                           <p className="text-sm text-muted-foreground">
-                            {format(parseISO(meeting.date), "MMM d")} at {meeting.time}
+                            {format(parseISO(meeting.date), "MMM d")} at{" "}
+                            {meeting.time}
                           </p>
                         </div>
-                        <Badge variant={getStatusBadgeVariant(meeting.status)} className="flex-shrink-0">
+                        <Badge
+                          variant={getStatusBadgeVariant(meeting.status)}
+                          className="flex-shrink-0"
+                        >
                           {meeting.status.replace("_", " ")}
                         </Badge>
                       </div>
-                    </Link>
+                    </Button>
                   ))}
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <Calendar className="h-12 w-12 text-muted-foreground/50 mb-3" />
                   <p className="text-muted-foreground">No upcoming meetings</p>
-                  <Link href="/meetings">
-                    <Button variant="outline" size="sm" className="mt-3" data-testid="button-schedule-meeting">
+                  <span onClick={() => navigate("/meetings")}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-3"
+                      data-testid="button-schedule-meeting"
+                    >
                       Schedule a Meeting
                     </Button>
-                  </Link>
+                  </span>
                 </div>
               )}
             </CardContent>
@@ -263,19 +321,28 @@ export default function Dashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4">
-              <CardTitle className="text-lg font-medium">Recent Documents</CardTitle>
-              <Link href="/documents">
-                <Button variant="ghost" size="sm" data-testid="button-view-all-documents">
+              <CardTitle className="text-lg font-medium">
+                Recent Documents
+              </CardTitle>
+              <span onClick={() => navigate(`/documents`)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  data-testid="button-view-all-documents"
+                >
                   View All
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
-              </Link>
+              </span>
             </CardHeader>
             <CardContent>
               {documentsLoading ? (
                 <div className="grid gap-4 sm:grid-cols-2">
                   {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 rounded-lg border">
+                    <div
+                      key={i}
+                      className="flex items-center gap-3 p-3 rounded-lg border"
+                    >
                       <Skeleton className="h-10 w-10 rounded" />
                       <div className="space-y-2 flex-1">
                         <Skeleton className="h-4 w-3/4" />
@@ -296,7 +363,9 @@ export default function Dashboard() {
                         <FileText className="h-5 w-5 text-muted-foreground" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate text-sm">{doc.title}</p>
+                        <p className="font-medium truncate text-sm">
+                          {doc.title}
+                        </p>
                         <p className="text-xs text-muted-foreground">
                           {doc.type} · {doc.size}
                         </p>
@@ -308,11 +377,16 @@ export default function Dashboard() {
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <FileText className="h-12 w-12 text-muted-foreground/50 mb-3" />
                   <p className="text-muted-foreground">No documents uploaded</p>
-                  <Link href="/documents">
-                    <Button variant="outline" size="sm" className="mt-3" data-testid="button-upload-document">
+                  <span onClick={() => navigate(`/documents`)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-3"
+                      data-testid="button-upload-document"
+                    >
                       Upload Document
                     </Button>
-                  </Link>
+                  </span>
                 </div>
               )}
             </CardContent>
@@ -322,13 +396,19 @@ export default function Dashboard() {
         <div className="space-y-6">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4">
-              <CardTitle className="text-lg font-medium">Action Items</CardTitle>
-              <Link href="/action-items">
-                <Button variant="ghost" size="sm" data-testid="button-view-all-actions">
+              <CardTitle className="text-lg font-medium">
+                Action Items
+              </CardTitle>
+              <span onClick={() => navigate(`/action-items`)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  data-testid="button-view-all-actions"
+                >
                   View All
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
-              </Link>
+              </span>
             </CardHeader>
             <CardContent>
               {actionItemsLoading ? (
@@ -353,11 +433,20 @@ export default function Dashboard() {
                         className="flex items-start gap-3 p-3 rounded-lg border hover-elevate"
                         data-testid={`action-item-${action.id}`}
                       >
-                        <div className={`h-2.5 w-2.5 rounded-full mt-1.5 flex-shrink-0 ${getPriorityColor(action.priority)}`} />
+                        <div
+                          className={`h-2.5 w-2.5 rounded-full mt-1.5 flex-shrink-0 ${getPriorityColor(action.priority)}`}
+                        />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium line-clamp-2">{action.title}</p>
-                          <p className={`text-xs mt-1 ${isOverdue ? "text-red-500" : "text-muted-foreground"}`}>
-                            Due {formatDistanceToNow(parseISO(action.dueDate), { addSuffix: true })}
+                          <p className="text-sm font-medium line-clamp-2">
+                            {action.title}
+                          </p>
+                          <p
+                            className={`text-xs mt-1 ${isOverdue ? "text-red-500" : "text-muted-foreground"}`}
+                          >
+                            Due{" "}
+                            {formatDistanceToNow(parseISO(action.dueDate), {
+                              addSuffix: true,
+                            })}
                           </p>
                         </div>
                       </div>
@@ -367,7 +456,9 @@ export default function Dashboard() {
               ) : (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <AlertCircle className="h-10 w-10 text-muted-foreground/50 mb-3" />
-                  <p className="text-sm text-muted-foreground">No pending action items</p>
+                  <p className="text-sm text-muted-foreground">
+                    No pending action items
+                  </p>
                 </div>
               )}
             </CardContent>
@@ -375,13 +466,19 @@ export default function Dashboard() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between gap-4 pb-4">
-              <CardTitle className="text-lg font-medium">Board Members</CardTitle>
-              <Link href="/members">
-                <Button variant="ghost" size="sm" data-testid="button-view-all-members">
+              <CardTitle className="text-lg font-medium">
+                Board Members
+              </CardTitle>
+              <span onClick={() => navigate(`/members`)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  data-testid="button-view-all-members"
+                >
                   View All
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
-              </Link>
+              </span>
             </CardHeader>
             <CardContent>
               {membersLoading ? (
@@ -410,8 +507,12 @@ export default function Dashboard() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{member.name}</p>
-                        <p className="text-xs text-muted-foreground truncate">{member.role}</p>
+                        <p className="font-medium text-sm truncate">
+                          {member.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {member.role}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -419,7 +520,9 @@ export default function Dashboard() {
               ) : (
                 <div className="flex flex-col items-center justify-center py-8 text-center">
                   <Users className="h-10 w-10 text-muted-foreground/50 mb-3" />
-                  <p className="text-sm text-muted-foreground">No board members</p>
+                  <p className="text-sm text-muted-foreground">
+                    No board members
+                  </p>
                 </div>
               )}
             </CardContent>
